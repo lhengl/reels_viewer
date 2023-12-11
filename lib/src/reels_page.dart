@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
 import 'package:reels_viewer/src/utils/url_checker.dart';
 import 'package:video_player/video_player.dart';
+
 import 'components/like_icon.dart';
 import 'components/screen_options.dart';
 
@@ -17,6 +18,7 @@ class ReelsPage extends StatefulWidget {
   final Function()? onFollow;
   final SwiperController swiperController;
   final bool showProgressIndicator;
+  final bool looping;
   const ReelsPage({
     Key? key,
     required this.item,
@@ -28,6 +30,7 @@ class ReelsPage extends StatefulWidget {
     this.onShare,
     this.showProgressIndicator = true,
     required this.swiperController,
+    this.looping = true,
   }) : super(key: key);
 
   @override
@@ -38,31 +41,39 @@ class _ReelsPageState extends State<ReelsPage> {
   late VideoPlayerController _videoPlayerController;
   ChewieController? _chewieController;
   bool _liked = false;
+
   @override
   void initState() {
     super.initState();
-    if (!UrlChecker.isImageUrl(widget.item.url) &&
-        UrlChecker.isValid(widget.item.url)) {
+    if (!UrlChecker.isImageUrl(widget.item.url) && UrlChecker.isValid(widget.item.url)) {
       initializePlayer();
     }
   }
 
   Future initializePlayer() async {
-    _videoPlayerController = VideoPlayerController.network(widget.item.url);
+    _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(widget.item.url));
     await Future.wait([_videoPlayerController.initialize()]);
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
       autoPlay: true,
       showControls: false,
-      looping: false,
+      looping: widget.looping,
     );
     setState(() {});
     _videoPlayerController.addListener(() {
-      if (_videoPlayerController.value.position ==
-          _videoPlayerController.value.duration) {
+      if (_chewieController?.looping ?? false) return;
+      if (_videoPlayerController.value.position == _videoPlayerController.value.duration) {
         widget.swiperController.next();
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(ReelsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_chewieController?.looping != widget.looping) {
+      _chewieController?.setLooping(widget.looping);
+    }
   }
 
   @override
@@ -83,8 +94,7 @@ class _ReelsPageState extends State<ReelsPage> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        _chewieController != null &&
-                _chewieController!.videoPlayerController.value.isInitialized
+        _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized
             ? FittedBox(
                 fit: BoxFit.cover,
                 child: SizedBox(
@@ -106,13 +116,9 @@ class _ReelsPageState extends State<ReelsPage> {
                   ),
                 ),
               )
-            : Column(
+            : const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 10),
-                  Text('Loading...')
-                ],
+                children: [CircularProgressIndicator(), SizedBox(height: 10), Text('Loading...')],
               ),
         if (_liked)
           const Center(
