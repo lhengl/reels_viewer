@@ -168,6 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
             showProgressIndicator: true,
             showVerifiedTick: true,
             showAppbar: true,
+            autoplay: false,
             looping: true,
           )
         : const Scaffold(

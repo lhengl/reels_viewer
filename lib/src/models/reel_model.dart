@@ -84,7 +84,7 @@ class VideoReelModel extends ReelModel {
 class ImageReelModel extends ReelModel {
   final dynamic dataSource;
   final DataSourceType dataSourceType;
-  final Duration duration;
+  final Duration? duration;
 
   ImageReelModel.file(
     File file, {
@@ -96,7 +96,7 @@ class ImageReelModel extends ReelModel {
     super.reelDescription,
     super.musicName,
     super.commentList,
-    this.duration = const Duration(seconds: 5),
+    this.duration,
   })  : dataSource = file,
         dataSourceType = DataSourceType.file;
 
@@ -110,7 +110,7 @@ class ImageReelModel extends ReelModel {
     super.reelDescription,
     super.musicName,
     super.commentList,
-    this.duration = const Duration(seconds: 5),
+    this.duration,
   }) : dataSourceType = DataSourceType.asset;
 
   ImageReelModel.network(
@@ -123,7 +123,7 @@ class ImageReelModel extends ReelModel {
     super.reelDescription,
     super.musicName,
     super.commentList,
-    this.duration = const Duration(seconds: 5),
+    this.duration,
   })  : dataSource = url,
         dataSourceType = DataSourceType.network;
 
@@ -137,7 +137,7 @@ class ImageReelModel extends ReelModel {
     super.reelDescription,
     super.musicName,
     super.commentList,
-    this.duration = const Duration(seconds: 5),
+    this.duration,
   })  : dataSource = bytes,
         dataSourceType = DataSourceType.contentUri;
 }

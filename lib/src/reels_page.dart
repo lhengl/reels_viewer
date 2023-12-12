@@ -17,8 +17,11 @@ class ReelsPage extends StatefulWidget {
   final Function()? onFollow;
   final SwiperController swiperController;
   final bool showProgressIndicator;
+  final bool autoplay;
   final bool looping;
+  final Duration defaultImageDuration;
   final Widget? background;
+
   const ReelsPage({
     Key? key,
     required this.item,
@@ -30,9 +33,12 @@ class ReelsPage extends StatefulWidget {
     this.onShare,
     this.showProgressIndicator = true,
     required this.swiperController,
-    this.looping = true,
+    required this.autoplay,
+    required this.looping,
+    required this.defaultImageDuration,
     this.background,
-  }) : super(key: key);
+  })  : assert(!(autoplay && looping), 'Only one of autoplay or looping can be true'),
+        super(key: key);
 
   @override
   State<ReelsPage> createState() => _ReelsPageState();
@@ -82,11 +88,17 @@ class _ReelsPageState extends State<ReelsPage> {
       return VideoReelView(
         item: item,
         swiperController: widget.swiperController,
+        showProgressIndicator: widget.showProgressIndicator,
+        autoplay: widget.autoplay,
+        looping: widget.looping,
       );
     } else if (item is ImageReelModel) {
       return ImageView(
         item: item,
         swiperController: widget.swiperController,
+        showProgressIndicator: widget.showProgressIndicator,
+        autoplay: widget.autoplay,
+        defaultDuration: widget.defaultImageDuration,
       );
     }
     throw ArgumentError('Unexpected item type: ${item.runtimeType}');

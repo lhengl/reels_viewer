@@ -7,16 +7,19 @@ import 'package:video_player/video_player.dart';
 
 class VideoReelView extends StatefulWidget {
   final VideoReelModel item;
-  final bool showProgressIndicator;
-  final bool looping;
   final SwiperController swiperController;
+  final bool showProgressIndicator;
+  final bool autoplay;
+  final bool looping;
+
   const VideoReelView({
     super.key,
     required this.item,
     required this.swiperController,
-    this.showProgressIndicator = true,
-    this.looping = true,
-  });
+    required this.showProgressIndicator,
+    required this.autoplay,
+    required this.looping,
+  }) : assert(!(autoplay && looping), 'Only one of autoplay or looping can be true');
 
   @override
   State<VideoReelView> createState() => _VideoReelViewState();
@@ -60,6 +63,7 @@ class _VideoReelViewState extends State<VideoReelView> {
     setState(() {});
     _videoPlayerController.addListener(() {
       if (_chewieController?.looping ?? false) return;
+      if (!widget.autoplay) return;
       if (_videoPlayerController.value.position == _videoPlayerController.value.duration) {
         widget.swiperController.next();
       }

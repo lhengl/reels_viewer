@@ -11,29 +11,36 @@ class ImageView extends StatelessWidget {
   final ImageReelModel item;
   final SwiperController swiperController;
   final bool showProgressIndicator;
-  final bool looping;
+  final bool autoplay;
+  final Duration defaultDuration;
 
   const ImageView({
     super.key,
     required this.item,
     required this.swiperController,
-    this.showProgressIndicator = true,
-    this.looping = true,
+    required this.showProgressIndicator,
+    required this.autoplay,
+    required this.defaultDuration,
   });
+
+  /// For performance reason, an image must autoplay a minimum of 2 seconds
+  static const minDuration = Duration(seconds: 2);
+
+  Duration get duration => item.duration ?? defaultDuration;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         _buildImage(context),
-        if (showProgressIndicator)
+        if (autoplay)
           Positioned(
             bottom: 0,
             width: MediaQuery.of(context).size.width,
             child: ImageProgressIndicator(
-              duration: item.duration,
+              duration: duration < minDuration ? minDuration : duration,
               swiperController: swiperController,
-              looping: looping,
+              showProgressIndicator: showProgressIndicator,
             ),
           ),
       ],
@@ -83,14 +90,14 @@ class ImageView extends StatelessWidget {
 class ImageProgressIndicator extends StatefulWidget {
   const ImageProgressIndicator({
     super.key,
-    required this.duration,
     required this.swiperController,
-    this.looping = true,
+    required this.duration,
+    required this.showProgressIndicator,
   });
 
   final SwiperController swiperController;
   final Duration duration;
-  final bool looping;
+  final bool showProgressIndicator;
 
   @override
   State<ImageProgressIndicator> createState() => _ImageProgressIndicatorState();
@@ -99,7 +106,7 @@ class ImageProgressIndicator extends StatefulWidget {
 class _ImageProgressIndicatorState extends State<ImageProgressIndicator> {
   late Timer _timer;
   Duration _elapsedTime = Duration.zero;
-  final Duration _interval = const Duration(milliseconds: 100);
+  static const Duration _interval = Duration(milliseconds: 100);
 
   double get progressValue => _elapsedTime.inMilliseconds / widget.duration.inMilliseconds;
 
@@ -110,11 +117,7 @@ class _ImageProgressIndicatorState extends State<ImageProgressIndicator> {
       setState(() {
         _elapsedTime = _elapsedTime + _interval;
         if (progressValue > 1.0) {
-          if (widget.looping) {
-            _elapsedTime = Duration.zero;
-          } else {
-            widget.swiperController.next();
-          }
+          widget.swiperController.next();
         }
       });
     });
@@ -128,10 +131,12 @@ class _ImageProgressIndicatorState extends State<ImageProgressIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    return LinearProgressIndicator(
-      backgroundColor: Colors.blueGrey,
-      color: Colors.blueAccent,
-      value: progressValue,
-    );
+    return widget.showProgressIndicator
+        ? LinearProgressIndicator(
+            backgroundColor: Colors.blueGrey,
+            color: Colors.blueAccent,
+            value: progressValue,
+          )
+        : const SizedBox();
   }
 }
