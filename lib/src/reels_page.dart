@@ -1,9 +1,9 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
-import 'package:reels_viewer/src/components/video_view.dart';
+import 'package:reels_viewer/src/components/video_reel_view.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
 
-import 'components/image_view.dart';
+import 'components/image_reel_view.dart';
 import 'components/like_icon.dart';
 import 'components/screen_options.dart';
 
@@ -93,7 +93,7 @@ class _ReelsPageState extends State<ReelsPage> {
         looping: widget.looping,
       );
     } else if (item is ImageReelModel) {
-      return ImageView(
+      return ImageReelView(
         item: item,
         swiperController: widget.swiperController,
         showProgressIndicator: widget.showProgressIndicator,

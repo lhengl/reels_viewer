@@ -7,14 +7,14 @@ import 'package:reels_viewer/src/components/loading_widget.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
 import 'package:video_player/video_player.dart';
 
-class ImageView extends StatelessWidget {
+class ImageReelView extends StatelessWidget {
   final ImageReelModel item;
   final SwiperController swiperController;
   final bool showProgressIndicator;
   final bool autoplay;
   final Duration defaultDuration;
 
-  const ImageView({
+  const ImageReelView({
     super.key,
     required this.item,
     required this.swiperController,

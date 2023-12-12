@@ -1,6 +1,6 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
-import 'package:reels_viewer/src/components/image_view.dart';
+import 'package:reels_viewer/src/components/image_reel_view.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
 import 'package:reels_viewer/src/reels_page.dart';
 
@@ -51,7 +51,7 @@ class ReelsViewer extends StatefulWidget {
 
   /// The default duration of a still image. Defaults to 5 seconds.
   /// For performance reason, it must be at least 2 seconds.
-  /// See: [ImageView.minDuration]
+  /// See: [ImageReelView.minDuration]
   final Duration defaultImageDuration;
 
   const ReelsViewer({

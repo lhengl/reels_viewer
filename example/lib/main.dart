@@ -94,6 +94,26 @@ class _MyHomePageState extends State<MyHomePage> {
       id: 'assets/melody-zimmerman-hlAoUJsSg1M-unsplash.jpg',
       reelDescription: "melody-zimmerman-hlAoUJsSg1M-unsplash.jpg",
     ),
+    VideoReelModel.network(
+      'invalidVideoUrl',
+      id: 'invalidVideoUrl',
+      userName: 'invalidVideoUrl',
+    ),
+    VideoReelModel.asset(
+      'invalidVideoAsset',
+      id: 'invalidVideoAsset',
+      userName: 'invalidVideoAsset',
+    ),
+    ImageReelModel.network(
+      'invalidImageUrl',
+      id: 'invalidImageUrl',
+      userName: 'invalidImageUrl',
+    ),
+    ImageReelModel.asset(
+      'invalidImageAsset',
+      id: 'invalidImageAsset',
+      userName: 'invalidImageAsset',
+    ),
   ];
 
   bool _isInitialised = false;
