@@ -1,10 +1,9 @@
 import 'package:card_swiper/card_swiper.dart';
-import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:reels_viewer/src/components/video_view.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
-import 'package:reels_viewer/src/utils/url_checker.dart';
-import 'package:video_player/video_player.dart';
 
+import 'components/image_view.dart';
 import 'components/like_icon.dart';
 import 'components/screen_options.dart';
 
@@ -19,6 +18,7 @@ class ReelsPage extends StatefulWidget {
   final SwiperController swiperController;
   final bool showProgressIndicator;
   final bool looping;
+  final Widget? background;
   const ReelsPage({
     Key? key,
     required this.item,
@@ -31,6 +31,7 @@ class ReelsPage extends StatefulWidget {
     this.showProgressIndicator = true,
     required this.swiperController,
     this.looping = true,
+    this.background,
   }) : super(key: key);
 
   @override
@@ -38,105 +39,29 @@ class ReelsPage extends StatefulWidget {
 }
 
 class _ReelsPageState extends State<ReelsPage> {
-  late VideoPlayerController _videoPlayerController;
-  ChewieController? _chewieController;
   bool _liked = false;
 
   @override
-  void initState() {
-    super.initState();
-    if (!UrlChecker.isImageUrl(widget.item.url) && UrlChecker.isValid(widget.item.url)) {
-      initializePlayer();
-    }
-  }
-
-  Future initializePlayer() async {
-    _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(widget.item.url));
-    await Future.wait([_videoPlayerController.initialize()]);
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      autoPlay: true,
-      showControls: false,
-      looping: widget.looping,
-    );
-    setState(() {});
-    _videoPlayerController.addListener(() {
-      if (_chewieController?.looping ?? false) return;
-      if (_videoPlayerController.value.position == _videoPlayerController.value.duration) {
-        widget.swiperController.next();
-      }
-    });
-  }
-
-  @override
-  void didUpdateWidget(ReelsPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_chewieController?.looping != widget.looping) {
-      _chewieController?.setLooping(widget.looping);
-    }
-  }
-
-  @override
-  void dispose() {
-    _videoPlayerController.dispose();
-    if (_chewieController != null) {
-      _chewieController!.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return getVideoView();
-  }
-
-  Widget getVideoView() {
     return Stack(
       fit: StackFit.expand,
       children: [
-        _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized
-            ? FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  child: GestureDetector(
-                    onDoubleTap: () {
-                      if (!widget.item.isLiked) {
-                        _liked = true;
-                        if (widget.onLike != null) {
-                          widget.onLike!(widget.item.url);
-                        }
-                        setState(() {});
-                      }
-                    },
-                    child: Chewie(
-                      controller: _chewieController!,
-                    ),
-                  ),
-                ),
-              )
-            : const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [CircularProgressIndicator(), SizedBox(height: 10), Text('Loading...')],
-              ),
+        if (widget.background != null) widget.background!,
+        GestureDetector(
+          onDoubleTap: () {
+            if (!widget.item.isLiked) {
+              _liked = true;
+              if (widget.onLike != null) {
+                widget.onLike!(widget.item.id);
+              }
+              setState(() {});
+            }
+          },
+          child: _buildMediaLayer(),
+        ),
         if (_liked)
           const Center(
             child: LikeIcon(),
-          ),
-        if (widget.showProgressIndicator)
-          Positioned(
-            bottom: 0,
-            width: MediaQuery.of(context).size.width,
-            child: VideoProgressIndicator(
-              _videoPlayerController,
-              allowScrubbing: false,
-              colors: const VideoProgressColors(
-                backgroundColor: Colors.blueGrey,
-                bufferedColor: Colors.blueGrey,
-                playedColor: Colors.blueAccent,
-              ),
-            ),
           ),
         ScreenOptions(
           onClickMoreBtn: widget.onClickMoreBtn,
@@ -146,8 +71,24 @@ class _ReelsPageState extends State<ReelsPage> {
           onShare: widget.onShare,
           showVerifiedTick: widget.showVerifiedTick,
           item: widget.item,
-        )
+        ),
       ],
     );
+  }
+
+  Widget _buildMediaLayer() {
+    final item = widget.item;
+    if (item is VideoReelModel) {
+      return VideoReelView(
+        item: item,
+        swiperController: widget.swiperController,
+      );
+    } else if (item is ImageReelModel) {
+      return ImageView(
+        item: item,
+        swiperController: widget.swiperController,
+      );
+    }
+    throw ArgumentError('Unexpected item type: ${item.runtimeType}');
   }
 }
