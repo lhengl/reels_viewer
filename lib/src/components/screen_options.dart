@@ -55,68 +55,79 @@ class ScreenOptions extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 110),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              if (item.profileUrl != null) UserProfileImage(profileUrl: item.profileUrl ?? ''),
-              if (item.profileUrl == null)
-                const CircleAvatar(
-                  child: Icon(Icons.person, size: 18),
-                  radius: 16,
-                ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  item.userName,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-              const SizedBox(width: 10),
-              if (showVerifiedTick)
-                const Icon(
-                  Icons.verified,
-                  size: 15,
-                  color: Colors.white,
-                ),
-              if (showVerifiedTick) const SizedBox(width: 6),
-              if (onFollow != null)
-                TextButton(
-                  onPressed: onFollow,
-                  child: const Text(
-                    'Follow',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          _buildProfileRow(),
           const SizedBox(width: 6),
-          if (item.reelDescription != null)
-            Text(item.reelDescription ?? '',
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: const TextStyle(
-                  color: Colors.white,
-                )),
+          if (item.reelDescription != null) _buildDescriptionRow(),
           const SizedBox(height: 10),
-          if (item.musicName != null)
-            Row(
-              children: [
-                const Icon(
-                  Icons.music_note,
-                  size: 15,
-                  color: Colors.white,
-                ),
-                Text(
-                  'Original Audio - ${item.musicName}',
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
+          if (item.musicName != null) _buildMusicRow(),
         ],
       ),
+    );
+  }
+
+  Row _buildProfileRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        item.profileUrl != null
+            ? UserProfileImage(profileUrl: item.profileUrl!)
+            : const CircleAvatar(
+                child: Icon(Icons.person, size: 18),
+                radius: 16,
+              ),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            item.userName,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+        const SizedBox(width: 10),
+        if (showVerifiedTick)
+          const Icon(
+            Icons.verified,
+            size: 15,
+            color: Colors.white,
+          ),
+        if (showVerifiedTick) const SizedBox(width: 6),
+        if (onFollow != null)
+          TextButton(
+            onPressed: onFollow,
+            child: const Text(
+              'Follow',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Text _buildDescriptionRow() {
+    return Text(item.reelDescription ?? '',
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+        style: const TextStyle(
+          color: Colors.white,
+        ));
+  }
+
+  Row _buildMusicRow() {
+    return Row(
+      children: [
+        const Icon(
+          Icons.music_note,
+          size: 15,
+          color: Colors.white,
+        ),
+        Text(
+          'Original Audio - ${item.musicName}',
+          style: const TextStyle(color: Colors.white),
+        ),
+      ],
     );
   }
 
