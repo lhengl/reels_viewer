@@ -7,7 +7,7 @@ class ErrorPage extends StatelessWidget {
 
   const ErrorPage({
     super.key,
-    required this.title,
+    this.title = 'Oops! Something went wrong',
     required this.message,
     this.onRetry,
   });

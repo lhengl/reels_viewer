@@ -32,6 +32,7 @@ class ImageReelView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       children: [
         _buildImage(context),
         if (autoplay)
@@ -60,6 +61,9 @@ class ImageReelView extends StatelessWidget {
           width: width,
           height: height,
           fit: BoxFit.cover,
+          errorBuilder: (c, e, s) => const ErrorPage(
+            message: 'Unable to load image asset',
+          ),
         );
       case DataSourceType.network:
         return CachedNetworkImage(
@@ -69,8 +73,7 @@ class ImageReelView extends StatelessWidget {
           fit: BoxFit.cover,
           placeholder: (_, __) => const LoadingWidget(),
           errorWidget: (_, url, ___) => ErrorPage(
-            title: 'Oops! Something went wrong',
-            message: 'Unable to load: $url',
+            message: 'Unable to load image url: $url',
           ),
         );
       case DataSourceType.file:
@@ -79,6 +82,9 @@ class ImageReelView extends StatelessWidget {
           width: width,
           height: height,
           fit: BoxFit.cover,
+          errorBuilder: (c, e, s) => const ErrorPage(
+            message: 'Unable to load image file',
+          ),
         );
 
       case DataSourceType.contentUri:
@@ -87,6 +93,9 @@ class ImageReelView extends StatelessWidget {
           width: width,
           height: height,
           fit: BoxFit.cover,
+          errorBuilder: (c, e, s) => const ErrorPage(
+            message: 'Unable to load image from memory',
+          ),
         );
     }
   }

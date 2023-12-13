@@ -82,9 +82,8 @@ class _VideoReelViewState extends State<VideoReelView> {
 
       changeState(SuccessState());
     } on PlatformException catch (e, stackTrace) {
-      debugPrint('e.runtimeType=${e.runtimeType} stackTrace=$stackTrace');
       changeState(ErrorState(
-        message: "The video couldn't be played. Please try again later.",
+        message: "Unable to load video. Please try again later.",
         stackTrace: stackTrace,
       ));
     }
@@ -137,7 +136,6 @@ class _VideoReelViewState extends State<VideoReelView> {
         ),
       (LoadingState _) => const LoadingWidget(),
       (ErrorState state) => ErrorPage(
-          title: 'Oops! Something went wrong',
           message: state.message,
         ),
     };
