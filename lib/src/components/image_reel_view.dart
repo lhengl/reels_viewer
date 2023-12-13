@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
+import 'package:reels_viewer/src/components/error_page.dart';
 import 'package:reels_viewer/src/components/loading_widget.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
 import 'package:video_player/video_player.dart';
@@ -67,6 +68,10 @@ class ImageReelView extends StatelessWidget {
           imageUrl: dataSource,
           fit: BoxFit.cover,
           placeholder: (_, __) => const LoadingWidget(),
+          errorWidget: (_, url, ___) => ErrorPage(
+            title: 'Oops! Something went wrong',
+            message: 'Unable to load: $url',
+          ),
         );
       case DataSourceType.file:
         return Image.file(

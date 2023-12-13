@@ -1,9 +1,13 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:reels_viewer/src/components/loading_widget.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
 import 'package:video_player/video_player.dart';
+
+import '../models/view_state.dart';
+import 'error_page.dart';
 
 class VideoReelView extends StatefulWidget {
   final VideoReelModel item;
@@ -28,7 +32,13 @@ class VideoReelView extends StatefulWidget {
 class _VideoReelViewState extends State<VideoReelView> {
   late VideoPlayerController _videoPlayerController;
   ChewieController? _chewieController;
-  bool _isInitialised = false;
+  ViewState _viewState = LoadingState();
+
+  void changeState(ViewState state) {
+    setState(() {
+      _viewState = state;
+    });
+  }
 
   @override
   void initState() {
@@ -37,38 +47,47 @@ class _VideoReelViewState extends State<VideoReelView> {
   }
 
   Future<void> initVideoPlayer() async {
-    final dataSource = widget.item.dataSource;
-    final dataSourceType = widget.item.dataSourceType;
-    switch (dataSourceType) {
-      case DataSourceType.asset:
-        _videoPlayerController = VideoPlayerController.asset(dataSource);
-        break;
-      case DataSourceType.network:
-        _videoPlayerController = VideoPlayerController.networkUrl(dataSource);
-        break;
-      case DataSourceType.file:
-        _videoPlayerController = VideoPlayerController.file(dataSource);
-        break;
-      case DataSourceType.contentUri:
-        _videoPlayerController = VideoPlayerController.contentUri(dataSource);
-        break;
-    }
-    await Future.wait([_videoPlayerController.initialize()]);
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      autoPlay: true,
-      showControls: false,
-      looping: widget.looping,
-    );
-    setState(() {});
-    _videoPlayerController.addListener(() {
-      if (_chewieController?.looping ?? false) return;
-      if (!widget.autoplay) return;
-      if (_videoPlayerController.value.position == _videoPlayerController.value.duration) {
-        widget.swiperController.next();
+    try {
+      final dataSource = widget.item.dataSource;
+      final dataSourceType = widget.item.dataSourceType;
+      switch (dataSourceType) {
+        case DataSourceType.asset:
+          _videoPlayerController = VideoPlayerController.asset(dataSource);
+          break;
+        case DataSourceType.network:
+          _videoPlayerController = VideoPlayerController.networkUrl(dataSource);
+          break;
+        case DataSourceType.file:
+          _videoPlayerController = VideoPlayerController.file(dataSource);
+          break;
+        case DataSourceType.contentUri:
+          _videoPlayerController = VideoPlayerController.contentUri(dataSource);
+          break;
       }
-    });
-    _isInitialised = true;
+      await Future.wait([_videoPlayerController.initialize()]);
+      _chewieController = ChewieController(
+        videoPlayerController: _videoPlayerController,
+        autoPlay: true,
+        showControls: false,
+        looping: widget.looping,
+      );
+
+      _videoPlayerController.addListener(() {
+        if (_chewieController?.looping ?? false) return;
+        if (!widget.autoplay) return;
+        if (_videoPlayerController.value.position == _videoPlayerController.value.duration) {
+          widget.swiperController.next();
+        }
+      });
+
+      changeState(SuccessState());
+    } on PlatformException catch (e, stackTrace) {
+      debugPrint('e.runtimeType=${e.runtimeType} stackTrace=$stackTrace');
+      changeState(ErrorState(
+        message: "The video couldn't be played. Please try again later.",
+        stackTrace: stackTrace,
+      ));
+    }
   }
 
   @override
@@ -88,34 +107,39 @@ class _VideoReelViewState extends State<VideoReelView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        _isInitialised
-            ? FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  child: Chewie(controller: _chewieController!),
-                ),
-              )
-            : const LoadingWidget(),
-        if (widget.showProgressIndicator)
-          Positioned(
-            bottom: 0,
-            width: MediaQuery.of(context).size.width,
-            child: VideoProgressIndicator(
-              _videoPlayerController,
-              allowScrubbing: false,
-              colors: const VideoProgressColors(
-                backgroundColor: Colors.blueGrey,
-                bufferedColor: Colors.blueGrey,
-                playedColor: Colors.blueAccent,
+    return switch (_viewState) {
+      (SuccessState _) => Stack(
+          fit: StackFit.expand,
+          children: [
+            FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Chewie(controller: _chewieController!),
               ),
             ),
-          ),
-      ],
-    );
+            if (widget.showProgressIndicator)
+              Positioned(
+                bottom: 0,
+                width: MediaQuery.of(context).size.width,
+                child: VideoProgressIndicator(
+                  _videoPlayerController,
+                  allowScrubbing: false,
+                  colors: const VideoProgressColors(
+                    backgroundColor: Colors.blueGrey,
+                    bufferedColor: Colors.blueGrey,
+                    playedColor: Colors.blueAccent,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      (LoadingState _) => const LoadingWidget(),
+      (ErrorState state) => ErrorPage(
+          title: 'Oops! Something went wrong',
+          message: state.message,
+        ),
+    };
   }
 }
