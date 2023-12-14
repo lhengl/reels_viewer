@@ -160,6 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    log('build');
     return _isInitialised
         ? ReelsViewer(
             reelsList: reelsList,
@@ -184,12 +185,30 @@ class _MyHomePageState extends State<MyHomePage> {
             },
             onIndexChanged: (index) {
               log('======> Current Index ======> $index <========');
+              // demonstration for adding more items to the list
+              if (index == (reelsList.length - 1)) {
+                log('on last page, adding more...');
+                final moreImageReels = List.generate(1, (moreIndex) {
+                  final newIndex = reelsList.length + moreIndex;
+                  final id = 'unsplash_$newIndex';
+                  // use a cache buster technique to cache multiple images
+                  return ImageReelModel.network(
+                    'https://source.unsplash.com/576x1024?index=$newIndex',
+                    id: id,
+                    userName: id,
+                  );
+                });
+                setState(() {
+                  reelsList.addAll(moreImageReels);
+                });
+              }
             },
             showProgressIndicator: true,
             showVerifiedTick: true,
             showAppbar: true,
             autoplay: false,
-            looping: true,
+            videoLoop: true,
+            swiperLoop: false,
           )
         : const Scaffold(
             body: Center(

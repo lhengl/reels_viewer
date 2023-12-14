@@ -42,12 +42,19 @@ class ReelsViewer extends StatefulWidget {
   final bool showVerifiedTick;
 
   /// Plays the next item automatically when true. Defaults to false.
-  /// Both [looping] and [autoplay] cannot be true.
+  /// Both [videoLoop] and [autoplay] cannot be true.
   final bool autoplay;
 
-  /// Loops all videos if true. Defaults to true.
-  /// Both [looping] and [autoplay] cannot be true.
-  final bool looping;
+  /// Loops videos if true. Defaults to true.
+  /// Both [videoLoop] and [autoplay] cannot be true.
+  final bool videoLoop;
+
+  /// Loops reel list if true. Defaults to false.
+  /// Note: When working with dynamic list of items, leave this as false.
+  /// There is a bug in card_swiper package, where adding items to the list
+  /// while swiping in reverse order will lead to unexpected behaviour:
+  /// https://github.com/TheAnkurPanchani/card_swiper/issues/96
+  final bool swiperLoop;
 
   /// The default duration of a still image. Defaults to 5 seconds.
   /// For performance reason, it must be at least 2 seconds.
@@ -69,9 +76,10 @@ class ReelsViewer extends StatefulWidget {
     this.showProgressIndicator = true,
     this.showVerifiedTick = true,
     this.autoplay = false,
-    this.looping = true,
+    this.videoLoop = true,
+    this.swiperLoop = false,
     this.defaultImageDuration = const Duration(seconds: 5),
-  })  : assert(!(autoplay && looping), 'Only one of autoplay or looping can be true'),
+  })  : assert(!(autoplay && videoLoop), 'Only one of autoplay or looping can be true'),
         super(key: key);
 
   @override
@@ -107,7 +115,7 @@ class _ReelsViewerState extends State<ReelsViewer> {
                   showVerifiedTick: widget.showVerifiedTick,
                   swiperController: controller,
                   showProgressIndicator: widget.showProgressIndicator,
-                  looping: widget.looping,
+                  looping: widget.videoLoop,
                   autoplay: widget.autoplay,
                   defaultImageDuration: widget.defaultImageDuration,
                 );
