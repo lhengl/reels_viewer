@@ -15,6 +15,7 @@ class ReelsPage extends StatefulWidget {
   final Function(String)? onComment;
   final Function()? onClickMoreBtn;
   final Function()? onFollow;
+  final Function()? loadMore;
   final SwiperController swiperController;
   final bool showProgressIndicator;
   final bool autoplay;
@@ -31,6 +32,7 @@ class ReelsPage extends StatefulWidget {
     this.onFollow,
     this.onLike,
     this.onShare,
+    this.loadMore,
     this.showProgressIndicator = true,
     required this.swiperController,
     required this.autoplay,
@@ -75,6 +77,7 @@ class _ReelsPageState extends State<ReelsPage> {
           onFollow: widget.onFollow,
           onLike: widget.onLike,
           onShare: widget.onShare,
+          loadMore: widget.loadMore,
           showVerifiedTick: widget.showVerifiedTick,
           item: widget.item,
         ),

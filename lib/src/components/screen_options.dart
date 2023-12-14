@@ -13,6 +13,7 @@ class ScreenOptions extends StatelessWidget {
   final Function(String)? onComment;
   final Function()? onClickMoreBtn;
   final Function()? onFollow;
+  final Function()? loadMore;
 
   const ScreenOptions({
     Key? key,
@@ -23,6 +24,7 @@ class ScreenOptions extends StatelessWidget {
     this.onFollow,
     this.onLike,
     this.onShare,
+    this.loadMore,
   }) : super(key: key);
 
   @override

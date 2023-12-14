@@ -5,8 +5,13 @@ import 'package:reels_viewer/src/components/comment_item.dart';
 class CommentBottomSheet extends StatefulWidget {
   final List<ReelCommentModel> commentList;
   final Function(String)? onComment;
-  const CommentBottomSheet({Key? key, required this.commentList,this.onComment})
-      : super(key: key);
+  final Function()? loadMore;
+  const CommentBottomSheet({
+    super.key,
+    required this.commentList,
+    this.onComment,
+    this.loadMore,
+  });
 
   @override
   State<CommentBottomSheet> createState() => _CommentBottomSheetState();
@@ -40,9 +45,16 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.only(left: 16, right: 16),
-                itemCount: widget.commentList.length,
-                itemBuilder: (ctx, i) =>
-                    CommentItem(commentItem: widget.commentList[i]),
+                itemCount: widget.commentList.length + 1,
+                itemBuilder: (ctx, i) {
+                  if (i == widget.commentList.length) {
+                    return TextButton(
+                      child: const Text("Load More"),
+                      onPressed: widget.loadMore,
+                    );
+                  }
+                  return CommentItem(commentItem: widget.commentList[i]);
+                },
               ),
             ),
           if (widget.commentList.isEmpty)
@@ -52,23 +64,23 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
             )),
           const Divider(),
           Padding(
-            padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom),
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
             child: TextField(
               controller: commentController,
               decoration: InputDecoration(
                 hintText: 'Add a comment...',
                 hintStyle: const TextStyle(color: Colors.grey),
                 contentPadding: const EdgeInsets.all(10),
-                border: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white)),
-                suffixIcon: InkWell(onTap: () {
-                  if(widget.onComment!=null){
-                    String comment = commentController.text;
-                    widget.onComment!(comment);
-                  }
-                  Navigator.pop(context);
-                }, child: const Icon(Icons.send)),
+                border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+                suffixIcon: InkWell(
+                    onTap: () {
+                      if (widget.onComment != null) {
+                        String comment = commentController.text;
+                        widget.onComment!(comment);
+                      }
+                      Navigator.pop(context);
+                    },
+                    child: const Icon(Icons.send)),
               ),
             ),
           ),

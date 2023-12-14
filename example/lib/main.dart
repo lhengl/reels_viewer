@@ -203,6 +203,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
               }
             },
+            loadMoreComments: () {
+              log('======> Clicked on loadMore <======');
+            },
             showProgressIndicator: true,
             showVerifiedTick: true,
             showAppbar: true,

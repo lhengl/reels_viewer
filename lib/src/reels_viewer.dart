@@ -32,6 +32,8 @@ class ReelsViewer extends StatefulWidget {
   /// function invoke when reel change and return current index
   final Function(int)? onIndexChanged;
 
+  final Function()? loadMoreComments;
+
   /// for show/hide appbar, by default true
   final bool showAppbar;
 
@@ -70,6 +72,7 @@ class ReelsViewer extends StatefulWidget {
     this.onShare,
     this.onClickMoreBtn,
     this.onFollow,
+    this.loadMoreComments,
     this.onClickBackArrow,
     this.onIndexChanged,
     this.showAppbar = true,
@@ -112,6 +115,7 @@ class _ReelsViewerState extends State<ReelsViewer> {
                   onFollow: widget.onFollow,
                   onLike: widget.onLike,
                   onShare: widget.onShare,
+                  loadMore: widget.loadMoreComments,
                   showVerifiedTick: widget.showVerifiedTick,
                   swiperController: controller,
                   showProgressIndicator: widget.showProgressIndicator,
@@ -124,6 +128,7 @@ class _ReelsViewerState extends State<ReelsViewer> {
               itemCount: widget.reelsList.length,
               scrollDirection: Axis.vertical,
               onIndexChanged: widget.onIndexChanged,
+              loop: widget.swiperLoop,
             ),
             if (widget.showAppbar)
               Container(
