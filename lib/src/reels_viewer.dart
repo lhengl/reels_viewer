@@ -2,6 +2,7 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:reels_viewer/src/components/image_reel_view.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
+import 'package:reels_viewer/src/models/types.dart';
 import 'package:reels_viewer/src/reels_page.dart';
 
 class ReelsViewer extends StatefulWidget {
@@ -12,27 +13,27 @@ class ReelsViewer extends StatefulWidget {
   final String? appbarTitle;
 
   /// function invoke when user click on like btn and return reel url
-  final Function(String)? onLike;
+  final OnReelLike? onLike;
 
   /// function invoke when user click on comment btn and return reel comment
-  final Function(String)? onComment;
+  final OnReelComment? onComment;
 
   /// function invoke when user click on share btn and return reel url
-  final Function(String)? onShare;
+  final OnReelShare? onShare;
 
   /// function invoke when user click on more options btn
-  final Function()? onClickMoreBtn;
+  final OnMoreButtonTap? onClickMoreBtn;
 
   /// function invoke when user click on follow btn
-  final Function()? onFollow;
+  final OnReelFollow? onFollow;
 
   /// function invoke when user click on back btn
-  final Function()? onClickBackArrow;
+  final OnBackButtonTap? onClickBackArrow;
 
   /// function invoke when reel change and return current index
-  final Function(int)? onIndexChanged;
+  final OnIndexChanged? onIndexChanged;
 
-  final Function()? loadMoreComments;
+  final FetchReelComments? fetchComments;
 
   /// for show/hide appbar, by default true
   final bool showAppbar;
@@ -63,8 +64,12 @@ class ReelsViewer extends StatefulWidget {
   /// See: [ImageReelView.minDuration]
   final Duration defaultImageDuration;
 
+  final Widget? background;
+
+  final int commentPageSize;
+
   const ReelsViewer({
-    Key? key,
+    super.key,
     required this.reelsList,
     this.appbarTitle,
     this.onLike,
@@ -72,7 +77,7 @@ class ReelsViewer extends StatefulWidget {
     this.onShare,
     this.onClickMoreBtn,
     this.onFollow,
-    this.loadMoreComments,
+    this.fetchComments,
     this.onClickBackArrow,
     this.onIndexChanged,
     this.showAppbar = true,
@@ -82,8 +87,9 @@ class ReelsViewer extends StatefulWidget {
     this.videoLoop = true,
     this.swiperLoop = false,
     this.defaultImageDuration = const Duration(seconds: 5),
-  })  : assert(!(autoplay && videoLoop), 'Only one of autoplay or looping can be true'),
-        super(key: key);
+    this.background,
+    this.commentPageSize = 10,
+  }) : assert(!(autoplay && videoLoop), 'Only one of autoplay or looping can be true');
 
   @override
   State<ReelsViewer> createState() => _ReelsViewerState();
@@ -115,13 +121,15 @@ class _ReelsViewerState extends State<ReelsViewer> {
                   onFollow: widget.onFollow,
                   onLike: widget.onLike,
                   onShare: widget.onShare,
-                  loadMore: widget.loadMoreComments,
+                  fetchComments: widget.fetchComments,
                   showVerifiedTick: widget.showVerifiedTick,
                   swiperController: controller,
                   showProgressIndicator: widget.showProgressIndicator,
                   looping: widget.videoLoop,
                   autoplay: widget.autoplay,
                   defaultImageDuration: widget.defaultImageDuration,
+                  background: widget.background,
+                  commentPageSize: widget.commentPageSize,
                 );
               },
               controller: controller,

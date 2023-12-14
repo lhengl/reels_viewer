@@ -203,9 +203,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
               }
             },
-            loadMoreComments: () {
-              log('======> Clicked on loadMore <======');
-            },
+            commentPageSize: 10,
+            fetchComments: fetchComments,
             showProgressIndicator: true,
             showVerifiedTick: true,
             showAppbar: true,
@@ -218,5 +217,21 @@ class _MyHomePageState extends State<MyHomePage> {
               child: CircularProgressIndicator(),
             ),
           );
+  }
+
+  Future<List<ReelCommentModel>> fetchComments(
+    ReelModel reel,
+    int pageSize,
+  ) async {
+    // simulate delay
+    await Future.delayed(const Duration(seconds: 2));
+    return List.generate(
+        pageSize,
+        (index) => ReelCommentModel(
+              comment: 'https://source.unsplash.com/576x1024?person&index=$index',
+              userProfilePic: 'https://source.unsplash.com/576x1024?person&index=$index',
+              userName: 'userName_$index',
+              commentTime: DateTime.now(),
+            ));
   }
 }

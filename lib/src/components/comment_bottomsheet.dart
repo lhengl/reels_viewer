@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:reels_viewer/reels_viewer.dart';
 import 'package:reels_viewer/src/components/comment_item.dart';
 
+import '../models/types.dart';
+
 class CommentBottomSheet extends StatefulWidget {
-  final List<ReelCommentModel> commentList;
+  final ReelModel item;
   final Function(String)? onComment;
-  final Function()? loadMore;
+  final FetchReelComments? fetchComments;
+  final int pageSize;
   const CommentBottomSheet({
     super.key,
-    required this.commentList,
-    this.onComment,
-    this.loadMore,
+    required this.item,
+    required this.onComment,
+    required this.fetchComments,
+    required this.pageSize,
   });
 
   @override
@@ -18,7 +23,46 @@ class CommentBottomSheet extends StatefulWidget {
 }
 
 class _CommentBottomSheetState extends State<CommentBottomSheet> {
-  final commentController = TextEditingController(text: '');
+  final _commentController = TextEditingController(text: '');
+  final _pagingController = PagingController<String?, ReelCommentModel>(firstPageKey: null);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.item.commentList.isNotEmpty) {
+      _pagingController.appendPage(
+        widget.item.commentList,
+        widget.item.commentList.lastOrNull?.id,
+      );
+    }
+    _pagingController.addPageRequestListener((lastCommentId) {
+      _fetchComments(lastCommentId);
+    });
+    // Load initial comments
+  }
+
+  Future<void> _fetchComments(String? lastCommentId) async {
+    if (widget.fetchComments != null) {
+      try {
+        final fetchedComments = await widget.fetchComments!.call(
+          widget.item,
+          widget.pageSize,
+        );
+        final isLastPage = fetchedComments.length < widget.pageSize;
+        if (isLastPage) {
+          _pagingController.appendLastPage(fetchedComments);
+        } else {
+          _pagingController.appendPage(
+            fetchedComments,
+            fetchedComments.last.id,
+          );
+        }
+      } catch (error) {
+        _pagingController.error = error;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -41,50 +85,56 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
             ),
           ),
           const SizedBox(height: 20),
-          if (widget.commentList.isNotEmpty)
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.only(left: 16, right: 16),
-                itemCount: widget.commentList.length + 1,
-                itemBuilder: (ctx, i) {
-                  if (i == widget.commentList.length) {
-                    return TextButton(
-                      child: const Text("Load More"),
-                      onPressed: widget.loadMore,
-                    );
-                  }
-                  return CommentItem(commentItem: widget.commentList[i]);
+          const Divider(),
+          Expanded(
+            child: PagedListView<String?, ReelCommentModel>(
+              pagingController: _pagingController,
+              builderDelegate: PagedChildBuilderDelegate<ReelCommentModel>(
+                itemBuilder: (context, item, index) => CommentItem(
+                  commentItem: item,
+                ),
+                noItemsFoundIndicatorBuilder: (context) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.comment,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                      const Text('No comments yet'),
+                    ],
+                  );
                 },
               ),
             ),
-          if (widget.commentList.isEmpty)
-            const Expanded(
-                child: Center(
-              child: Text('No Comments yet.'),
-            )),
-          const Divider(),
-          Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: TextField(
-              controller: commentController,
-              decoration: InputDecoration(
-                hintText: 'Add a comment...',
-                hintStyle: const TextStyle(color: Colors.grey),
-                contentPadding: const EdgeInsets.all(10),
-                border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                suffixIcon: InkWell(
-                    onTap: () {
-                      if (widget.onComment != null) {
-                        String comment = commentController.text;
-                        widget.onComment!(comment);
-                      }
-                      Navigator.pop(context);
-                    },
-                    child: const Icon(Icons.send)),
-              ),
-            ),
           ),
+          const Divider(),
+          _buildCommentTextField(context),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCommentTextField(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: TextField(
+        controller: _commentController,
+        decoration: InputDecoration(
+          hintText: 'Add a comment...',
+          hintStyle: const TextStyle(color: Colors.grey),
+          contentPadding: const EdgeInsets.all(10),
+          border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+          suffixIcon: InkWell(
+              onTap: () {
+                if (widget.onComment != null) {
+                  String comment = _commentController.text;
+                  widget.onComment!(comment);
+                }
+                Navigator.pop(context);
+              },
+              child: const Icon(Icons.send)),
+        ),
       ),
     );
   }

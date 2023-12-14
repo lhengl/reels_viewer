@@ -2,6 +2,7 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:reels_viewer/src/components/video_reel_view.dart';
 import 'package:reels_viewer/src/models/reel_model.dart';
+import 'package:reels_viewer/src/models/types.dart';
 
 import 'components/image_reel_view.dart';
 import 'components/like_icon.dart';
@@ -10,37 +11,38 @@ import 'components/screen_options.dart';
 class ReelsPage extends StatefulWidget {
   final ReelModel item;
   final bool showVerifiedTick;
-  final Function(String)? onShare;
-  final Function(String)? onLike;
-  final Function(String)? onComment;
-  final Function()? onClickMoreBtn;
-  final Function()? onFollow;
-  final Function()? loadMore;
+  final OnReelShare? onShare;
+  final OnReelLike? onLike;
+  final OnReelComment? onComment;
+  final OnMoreButtonTap? onClickMoreBtn;
+  final OnReelFollow? onFollow;
+  final FetchReelComments? fetchComments;
   final SwiperController swiperController;
   final bool showProgressIndicator;
   final bool autoplay;
   final bool looping;
   final Duration defaultImageDuration;
   final Widget? background;
+  final int commentPageSize;
 
   const ReelsPage({
-    Key? key,
+    super.key,
     required this.item,
-    this.showVerifiedTick = true,
-    this.onClickMoreBtn,
-    this.onComment,
-    this.onFollow,
-    this.onLike,
-    this.onShare,
-    this.loadMore,
-    this.showProgressIndicator = true,
+    required this.showVerifiedTick,
+    required this.onClickMoreBtn,
+    required this.onComment,
+    required this.onFollow,
+    required this.onLike,
+    required this.onShare,
+    required this.fetchComments,
+    required this.showProgressIndicator,
     required this.swiperController,
     required this.autoplay,
     required this.looping,
     required this.defaultImageDuration,
-    this.background,
-  })  : assert(!(autoplay && looping), 'Only one of autoplay or looping can be true'),
-        super(key: key);
+    required this.background,
+    required this.commentPageSize,
+  }) : assert(!(autoplay && looping), 'Only one of autoplay or looping can be true');
 
   @override
   State<ReelsPage> createState() => _ReelsPageState();
@@ -77,9 +79,10 @@ class _ReelsPageState extends State<ReelsPage> {
           onFollow: widget.onFollow,
           onLike: widget.onLike,
           onShare: widget.onShare,
-          loadMore: widget.loadMore,
+          fetchComments: widget.fetchComments,
           showVerifiedTick: widget.showVerifiedTick,
           item: widget.item,
+          commentPageSize: widget.commentPageSize,
         ),
       ],
     );

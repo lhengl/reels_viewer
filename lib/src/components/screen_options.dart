@@ -3,29 +3,34 @@ import 'package:reels_viewer/reels_viewer.dart';
 import 'package:reels_viewer/src/components/user_profile_image.dart';
 import 'package:reels_viewer/src/utils/convert_numbers_to_short.dart';
 
+import '../models/types.dart';
 import 'comment_bottomsheet.dart';
 
 class ScreenOptions extends StatelessWidget {
   final ReelModel item;
   final bool showVerifiedTick;
-  final Function(String)? onShare;
-  final Function(String)? onLike;
-  final Function(String)? onComment;
-  final Function()? onClickMoreBtn;
-  final Function()? onFollow;
-  final Function()? loadMore;
+
+  final int commentPageSize;
+
+  final OnReelLike? onLike;
+  final OnReelShare? onShare;
+  final OnReelComment? onComment;
+  final FetchReelComments? fetchComments;
+  final OnMoreButtonTap? onClickMoreBtn;
+  final OnReelFollow? onFollow;
 
   const ScreenOptions({
-    Key? key,
+    super.key,
     required this.item,
-    this.showVerifiedTick = true,
-    this.onClickMoreBtn,
-    this.onComment,
-    this.onFollow,
-    this.onLike,
-    this.onShare,
-    this.loadMore,
-  }) : super(key: key);
+    required this.showVerifiedTick,
+    required this.onClickMoreBtn,
+    required this.onComment,
+    required this.onFollow,
+    required this.onLike,
+    required this.onShare,
+    required this.fetchComments,
+    required this.commentPageSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -152,14 +157,16 @@ class ScreenOptions extends StatelessWidget {
                   barrierColor: Colors.transparent,
                   context: context,
                   builder: (ctx) => CommentBottomSheet(
-                        commentList: item.commentList ?? [],
+                        item: item,
                         onComment: onComment,
+                        fetchComments: fetchComments,
+                        pageSize: commentPageSize,
                       ));
             }
           },
         ),
         Text(
-          NumbersToShort.convertNumToShort(item.commentList?.length ?? 0),
+          NumbersToShort.convertNumToShort(item.commentList.length),
           style: const TextStyle(color: Colors.white),
         ),
         const SizedBox(height: 20),

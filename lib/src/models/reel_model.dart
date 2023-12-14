@@ -12,7 +12,7 @@ abstract class ReelModel {
   final String? profileUrl;
   final String? reelDescription;
   final String? musicName;
-  final List<ReelCommentModel>? commentList;
+  final List<ReelCommentModel> commentList;
   ReelModel({
     required this.id,
     required this.userName,
@@ -21,8 +21,8 @@ abstract class ReelModel {
     this.profileUrl,
     this.reelDescription,
     this.musicName,
-    this.commentList,
-  });
+    List<ReelCommentModel>? commentList,
+  }) : commentList = commentList ?? [];
 }
 
 class VideoReelModel extends ReelModel {
